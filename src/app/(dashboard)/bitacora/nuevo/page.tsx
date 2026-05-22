@@ -80,49 +80,53 @@ function NuevoTurnoForm() {
     setSaving(true)
     const supabase = createClient()
 
+    const num = (val: string) => val.trim() !== '' ? parseFloat(val) : null
+    const int = (val: string) => val.trim() !== '' ? parseInt(val) : null
+
     const { data: shift, error } = await supabase.from('shifts').insert({
       location_id: locationId,
       user_id: userId,
       turno: form.turno,
       fecha,
       hora_llegada: form.hora_llegada || null,
-      caja_chica: form.caja_chica ? parseFloat(form.caja_chica) : null,
-      lectura_inicial: form.lectura_inicial ? parseFloat(form.lectura_inicial) : null,
-      lectura_final: form.lectura_final ? parseFloat(form.lectura_final) : null,
-      lectura_filtro_1_real: form.lectura_filtro_1_real ? parseFloat(form.lectura_filtro_1_real) : null,
-      lectura_filtro_1_proximo: form.lectura_filtro_1_proximo ? parseFloat(form.lectura_filtro_1_proximo) : null,
-      lectura_filtro_2_real: form.lectura_filtro_2_real ? parseFloat(form.lectura_filtro_2_real) : null,
-      lectura_filtro_2_proximo: form.lectura_filtro_2_proximo ? parseFloat(form.lectura_filtro_2_proximo) : null,
+      caja_chica: num(form.caja_chica),
+      lectura_inicial: num(form.lectura_inicial),
+      lectura_final: num(form.lectura_final),
+      lectura_filtro_1_real: num(form.lectura_filtro_1_real),
+      lectura_filtro_1_proximo: num(form.lectura_filtro_1_proximo),
+      lectura_filtro_2_real: num(form.lectura_filtro_2_real),
+      lectura_filtro_2_proximo: num(form.lectura_filtro_2_proximo),
       jabon_nivel: form.jabon_nivel || null,
       jabon_proximo_cambio: form.jabon_proximo_cambio || null,
       no_remision: form.no_remision || null,
       se_cloraron_tanques: form.se_cloraron_tanques,
       ozono_hora: form.ozono_hora || null,
-      ozono_minutos: form.ozono_minutos ? parseInt(form.ozono_minutos) : null,
-      garrafones_llenados: form.garrafones_llenados ? parseInt(form.garrafones_llenados) : 0,
-      total_ventas: form.total_ventas ? parseFloat(form.total_ventas) : 0,
+      ozono_minutos: int(form.ozono_minutos),
+      garrafones_llenados: int(form.garrafones_llenados) ?? 0,
+      total_ventas: num(form.total_ventas) ?? 0,
       observaciones: form.observaciones || null,
       status,
     }).select().single()
 
-    if (error || !shift) { setSaving(false); return }
+    if (error || !shift) {
+      console.error('Error:', error)
+      setSaving(false)
+      return
+    }
 
-    // Guardar envases
     const envasesData = [
-      { shift_id: shift.id, tipo: 'garrafon_20l', llenos: parseInt(envases.garrafon_20l_llenos) || 0, vacios: parseInt(envases.garrafon_20l_vacios) || 0 },
-      { shift_id: shift.id, tipo: 'botella_1l', llenos: parseInt(envases.botella_1l_llenos) || 0, vacios: parseInt(envases.botella_1l_vacios) || 0 },
-      { shift_id: shift.id, tipo: 'botella_250ml', llenos: parseInt(envases.botella_250ml_llenos) || 0, vacios: parseInt(envases.botella_250ml_vacios) || 0 },
+      { shift_id: shift.id, tipo: 'garrafon_20l', llenos: int(envases.garrafon_20l_llenos) ?? 0, vacios: int(envases.garrafon_20l_vacios) ?? 0 },
+      { shift_id: shift.id, tipo: 'botella_1l', llenos: int(envases.botella_1l_llenos) ?? 0, vacios: int(envases.botella_1l_vacios) ?? 0 },
+      { shift_id: shift.id, tipo: 'botella_250ml', llenos: int(envases.botella_250ml_llenos) ?? 0, vacios: int(envases.botella_250ml_vacios) ?? 0 },
     ]
     await supabase.from('shift_containers').insert(envasesData)
 
-    // Guardar tareas
     const tareasData = Object.entries(tareasCheck).map(([key, completado]) => ({
       shift_id: shift.id, task_key: key, completado,
       completado_at: completado ? new Date().toISOString() : null,
     }))
     if (tareasData.length > 0) await supabase.from('shift_cleaning_tasks').insert(tareasData)
 
-    // Guardar equipos
     const equiposData = Object.entries(equiposCheck).filter(([, v]) => v).map(([key, status]) => ({
       shift_id: shift.id, equipo_key: key, status,
     }))
