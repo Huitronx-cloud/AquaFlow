@@ -1,41 +1,32 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { toast } from 'sonner'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({ email: '', password: '' })
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleLogin() {
+    setError('')
     setLoading(true)
-
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({
-      email: form.email,
-      password: form.password,
-    })
-
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      toast.error('Correo o contraseña incorrectos')
+      setError('Correo o contraseña incorrectos')
       setLoading(false)
       return
     }
-
-    router.push('/dashboard')
-    router.refresh()
+    // Forzar recarga completa para que las cookies se lean en el servidor
+    window.location.href = '/dashboard'
   }
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-2">
             <div className="w-9 h-9 bg-sky-500 rounded-xl flex items-center justify-center">
@@ -47,62 +38,54 @@ export default function LoginPage() {
           </div>
           <p className="text-slate-500 text-sm">Tu purificadora, en control total.</p>
         </div>
-
-        {/* Card */}
         <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
           <h1 className="text-lg font-semibold text-slate-900 mb-6">Iniciar sesión</h1>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
+              {error}
+            </div>
+          )}
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Correo electrónico
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Correo electrónico</label>
               <input
                 type="email"
-                required
                 placeholder="hola@mipurificadora.com"
-                value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })}
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition"
               />
             </div>
-
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-sm font-medium text-slate-700">
-                  Contraseña
-                </label>
+                <label className="block text-sm font-medium text-slate-700">Contraseña</label>
                 <Link href="/forgot-password" className="text-xs text-sky-600 hover:text-sky-700">
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
               <input
                 type="password"
-                required
                 placeholder="••••••••"
-                value={form.password}
-                onChange={e => setForm({ ...form, password: e.target.value })}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition"
               />
             </div>
-
             <button
-              type="submit"
+              onClick={handleLogin}
               disabled={loading}
               className="w-full bg-sky-500 hover:bg-sky-600 disabled:bg-sky-300 text-white font-medium py-2.5 rounded-lg text-sm transition"
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
-          </form>
+          </div>
         </div>
-
         <p className="text-center text-sm text-slate-500 mt-6">
           ¿Aún no tienes cuenta?{' '}
           <Link href="/register" className="text-sky-600 hover:text-sky-700 font-medium">
             Regístrate gratis 30 días
           </Link>
         </p>
-
       </div>
     </div>
   )
