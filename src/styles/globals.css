@@ -4,14 +4,16 @@
 
 @layer base {
   :root {
-    --aqua-50:  #f0f9ff;
-    --aqua-100: #e0f2fe;
-    --aqua-500: #0ea5e9;
-    --aqua-600: #0284c7;
-    --aqua-700: #0369a1;
-    --aqua-900: #0c4a6e;
+    --border: 214.3 31.8% 91.4%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
   }
 
-  * { @apply border-border; }
-  body { @apply bg-background text-foreground; }
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
 }

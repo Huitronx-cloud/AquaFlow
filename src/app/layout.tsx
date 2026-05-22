@@ -11,14 +11,9 @@ export const metadata: Metadata = {
     template: '%s | Aqua Flow',
   },
   description: 'Tu purificadora, en control total.',
-  icons: { icon: '/favicon.ico' },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={inter.className}>
