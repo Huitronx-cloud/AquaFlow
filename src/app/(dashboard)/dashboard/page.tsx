@@ -29,14 +29,14 @@ export default function DashboardPage() {
         supabase.from('customers').select('id, status').eq('org_id', orgId),
         supabase.from('shifts').select('id, turno, status').eq('fecha', today),
       ])
-      const o = ordersRes.data || []
-      const c = customersRes.data || []
-      const s = shiftsRes.data || []
+      const o: any[] = ordersRes.data || []
+      const c: any[] = customersRes.data || []
+      const s: any[] = shiftsRes.data || []
       setOrders(o)
       setShifts(s)
       setStats({
-        ventas: o.reduce((sum: number, x: any) => sum + (x.total_mxn || 0), 0),
-garrafones: o.reduce((sum: number, x: any) => sum + (x.garrafones || 0), 0),
+        ventas: o.reduce((sum: number, x) => sum + (x.total_mxn || 0), 0),
+        garrafones: o.reduce((sum: number, x) => sum + (x.garrafones || 0), 0),
         pedidos: o.length,
         pedidosEntregados: o.filter(x => x.status === 'entregado').length,
         pedidosPendientes: o.filter(x => ['pendiente','confirmado'].includes(x.status)).length,
