@@ -35,8 +35,8 @@ export default function DashboardPage() {
       setOrders(o)
       setShifts(s)
       setStats({
-        ventas: o.reduce((sum, x) => sum + (x.total_mxn || 0), 0),
-        garrafones: o.reduce((sum, x) => sum + (x.garrafones || 0), 0),
+        ventas: o.reduce((sum: number, x) => sum + (x.total_mxn || 0), 0),
+garrafones: o.reduce((sum: number, x) => sum + (x.garrafones || 0), 0),
         pedidos: o.length,
         pedidosEntregados: o.filter(x => x.status === 'entregado').length,
         pedidosPendientes: o.filter(x => ['pendiente','confirmado'].includes(x.status)).length,
