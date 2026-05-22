@@ -61,7 +61,7 @@ function NuevoTurnoForm() {
   ]
 
   const [tareasCheck, setTareasCheck] = useState<Record<string, boolean>>({})
-  const [equiposCheck, setEquiposCheck] = useState<Record<string, 'ok' | 'alerta' | null>>({})
+  const [equiposCheck, setEquiposCheck] = useState<Record<string, "ok" | "alerta" | "falla" | null>>({})
 
   useEffect(() => {
     const supabase = createClient()
